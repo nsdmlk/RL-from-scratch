@@ -1,148 +1,191 @@
-# SmallFSL
+# RL-from-Scratch
 
-> Few-shot learning for small tabular data. Adaptive prototypes, calibrated prediction sets.
+> Reinforcement learning algorithms implemented from scratch in PyTorch. No Stable-Baselines3, no RLlib — every algorithm written line by line.
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-red.svg)](https://pytorch.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Status](https://img.shields.io/badge/status-planning-orange.svg)]()
+[![Status](https://img.shields.io/badge/status-in--progress-orange.svg)]()
 
-**SmallFSL** is a library for **few-shot classification on tabular data** ($K$-way, $N$-shot with $N \le 20$). Unlike image-based few-shot methods, SmallFSL does not require meta-training — it adapts prototypes and hyperparameters directly from the support set. Prediction sets come with finite-sample coverage guarantees via weighted conformal prediction.
+**rl-from-scratch** is a learning project: implementing classic and modern RL algorithms from first principles, tested on Gymnasium and MuJoCo environments.
 
-- **No meta-training.** Works directly from the support set.
-- **Adaptive hyperparameters** derived from $K$, $N$, $d$.
-- **Calibrated prediction sets** via weighted conformal.
-- **Tabular-first.** Designed for the regime where images are not available.
+Goal: understand RL deeply by building it, not by importing it.
 
 ---
 
-## Why SmallFSL?
+## Algorithms
 
-Few-shot learning is dominated by image benchmarks (Omniglot, Mini-ImageNet, CIFAR-FS). On **tabular** data — medical cohorts, chemistry, sensors — few-shot is under-explored, yet the need is real: collecting even 5 labeled examples per class is often expensive in scientific settings.
+### Value-based
 
-Existing approaches:
+| Algorithm | Status | Environment | Notes |
+|---|---|---|---|
+| Q-Learning | ✅ | FrozenLake, Taxi | Tabular |
+| DQN | ✅ | CartPole | Replay buffer, target network |
+| Double DQN | ✅ | CartPole | Reduces overestimation |
+| Dueling DQN | 🚧 | CartPole | Value + advantage streams |
+| Rainbow | 📋 | Atari | Planned |
 
-| Method          | Meta-training | Images | Tabular | Calibrated sets |
-| --------------- | ------------- | ------ | ------- | --------------- |
-| ProtoNet        | required      | ✓      | ✗       | ✗               |
-| MAML            | required      | ✓      | ✗       | ✗               |
-| In-context (LLM)| required      | —      | partial | ✗               |
-| **SmallFSL**    | **none**      | ✗      | ✓       | ✓               |
+### Policy-based
+
+| Algorithm | Status | Environment | Notes |
+|---|---|---|---|
+| REINFORCE | ✅ | CartPole | Monte Carlo policy gradient |
+| A2C | ✅ | CartPole, LunarLander | Advantage actor-critic |
+| PPO | ✅ | LunarLander, MuJoCo | Clipped surrogate objective |
+| TRPO | 📋 | MuJoCo | Trust region (planned) |
+
+### Off-policy actor-critic
+
+| Algorithm | Status | Environment | Notes |
+|---|---|---|---|
+| DDPG | ✅ | Pendulum | Deterministic policy |
+| TD3 | ✅ | MuJoCo | Twin critics, delayed updates |
+| SAC | ✅ | MuJoCo | Maximum entropy RL |
+
+### Model-based
+
+| Algorithm | Status | Environment | Notes |
+|---|---|---|---|
+| Dreamer V3 | 🚧 | DMControl | Latent dynamics |
+| TD-MPC2 | 📋 | DMControl | Planning + learning |
+| World Models | 📋 | CarRacing | VAE + RNN |
+---
+
+## Installation
+
+```bash
+git clone https://github.com/nsdmlk/rl-from-scratch.git
+cd rl-from-scratch
+pip install -e .
+```
+
+Requires Python 3.10+, PyTorch 2.0+, Gymnasium, MuJoCo.
 
 ---
 
-## Status
-
-**Planning stage.** Placeholder for future development.
-
-Planned milestones:
-- [ ] Prototype-based baseline (ProtoNet-style) for tabular
-- [ ] Adaptive width/dropout derived from $K$, $N$, $d$
-- [ ] Weighted conformal prediction sets
-- [ ] Benchmark on 10–15 small tabular datasets
-- [ ] Comparison with fine-tuned MLP, kNN, logistic regression
-- [ ] PyPI release
-
----
-
-## Planned API
+## Quick start
 
 ```python
-import numpy as np
-from smallfsl import SmallFSLClassifier
+from rl_from_scratch.ppo import PPO
+from rl_from_scratch.envs import make_env
 
-# Support set: K classes, N examples each
-X_support = np.random.randn(5 * 5, 10)   # 5-way, 5-shot
-y_support = np.repeat(np.arange(5), 5)
+env = make_env("LunarLander-v2")
+agent = PPO(env, lr=3e-4, n_steps=2048, batch_size=64)
+agent.train(total_steps=500_000)
+agent.save("ppo_lunarlander.pt")
+```
 
-# Query set
-X_query = np.random.randn(50, 10)
-y_query = np.random.randint(0, 5, 50)
+Evaluation:
 
-clf = SmallFSLClassifier()
-clf.fit(X_support, y_support)
-y_pred = clf.predict(X_query)
-sets = clf.predict_set(X_query, alpha=0.1)   # prediction sets
+```python
+agent.load("ppo_lunarlander.pt")
+returns = agent.evaluate(n_episodes=100)
+print(f"Mean return: {returns.mean():.1f}")
 ```
 
 ---
 
-## Planned Method
+## Project structure
 
-### 1. Adaptive prototype computation
-
-Class prototypes computed as **weighted** means of support examples, with weights from a learned metric:
-
-$$
-\mu_k = \frac{\sum_{i: y_i = k} w_i \, \phi(x_i)}{\sum_{i: y_i = k} w_i}
-$$
-
-where $\phi$ is an adaptive embedding (MLP with width from SmallMLP formula).
-
-### 2. Adaptive hyperparameters
-
-Width, dropout, and bias init derived from $K$, $N$, $d$ — same approach as SmallMLP, adapted to the few-shot regime.
-
-### 3. Calibrated prediction sets
-
-Weighted conformal prediction on top of prototype-based probabilities. Coverage guaranteed under exchangeability of query examples.
+```
+rl_from_scratch/
+├── algorithms/
+│   ├── q_learning.py
+│   ├── dqn.py
+│   ├── reinforce.py
+│   ├── a2c.py
+│   ├── ppo.py
+│   ├── ddpg.py
+│   ├── td3.py
+│   ├── sac.py
+│   └── dreamer.py
+├── networks/
+│   ├── mlp.py
+│   ├── cnn.py
+│   └── actor_critic.py
+├── buffers/
+│   ├── replay_buffer.py
+│   └── rollout_buffer.py
+├── envs/
+│   ├── wrappers.py
+│   └── make_env.py
+└── utils/
+    ├── logging.py
+    └── seeding.py
+```
 
 ---
 
-## When to use SmallFSL (planned)
+## Design principles
 
-**Good fit:**
-- $K \le 10$ classes, $N \le 20$ examples per class.
-- Tabular data with **nonlinear** class boundaries.
-- Scientific applications: rare disease cohorts, novel molecules, sensor calibration.
-- When **calibrated uncertainty** matters.
+1. **Readable over fast.** Every algorithm is written for clarity first, performance second.
+2. **No magic.** No Stable-Baselines3 imports. No hidden wrappers.
+3. **Tested.** Each algorithm has a test that runs a short training and checks the return is above threshold.
+4. **Logged.** Every run logs to TensorBoard: returns, losses, entropy, gradient norms.
+5. **Reproducible.** Fixed seeds, deterministic where possible.
 
-**Not a good fit:**
-- Image or text data (use standard FSL methods).
-- $N > 50$ (few-shot becomes regular classification).
-- Linear problems (logistic regression may suffice).
+---
+
+## What I'm learning
+
+- **PPO clipping** — why the ratio constraint stabilizes training.
+- **SAC entropy** — how temperature affects exploration.
+- **TD3 twin critics** — why overestimation bias matters.
+- **Dreamer latent dynamics** — how to learn world models.
+- **Reward shaping** — how to design rewards for sparse tasks.
+
+---
+
+## What I'm NOT doing
+
+- **Not chasing SOTA.** Stable-Baselines3 will beat this on every benchmark.
+- **Not supporting every environment.** Focused on Gymnasium + MuJoCo.
+- **Not production-ready.** This is a learning project.
+- **Not publishing papers** from this. This is foundation.
 
 ---
 
 ## Roadmap
 
-| Milestone | Status |
-|-----------|--------|
-| Tabular ProtoNet baseline | planned |
-| Adaptive hyperparameters | planned |
-| Conformal prediction sets | planned |
-| Benchmark (10–15 datasets) | planned |
-| Comparison with baselines | planned |
-| PyPI release | planned |
-| arXiv preprint | planned |
+- [ ] Q-Learning
+- [ ] DQN, Double DQN
+- [ ] REINFORCE, A2C
+- [ ] PPO
+- [ ] DDPG, TD3, SAC
+- [ ] Dueling DQN, Rainbow
+- [ ] Dreamer V3
+- [ ] TD-MPC2
+- [ ] Vectorized environments
+- [ ] Multi-GPU training
+- [ ] Blog post: "RL from scratch — what I learned"
 
 ---
 
-## Related work
+## References
 
-- **SmallGBM** — gradient boosting for small tabular data. [GitHub](https://github.com/nsdmlk/SmallGBM)
-- **SmallMLP** — adaptive MLP for small nonlinear data. [GitHub](https://github.com/nsdmlk/SmallMLP)
-- **SmallGP** — Gaussian Processes for small data. [GitHub](https://github.com/nsdmlk/SmallGP)
+Papers:
+- [PPO](https://arxiv.org/abs/1707.06347) — Schulman et al., 2017
+- [SAC](https://arxiv.org/abs/1801.01290) — Haarnoja et al., 2018
+- [TD3](https://arxiv.org/abs/1802.09477) — Fujimoto et al., 2018
+- [Dreamer V3](https://arxiv.org/abs/2301.04104) — Hafner et al., 2023
+- [DQN](https://www.nature.com/articles/nature14236) — Mnih et al., 2015
 
-Part of the **Small ML** series.
+Courses:
+- [CS285](https://rail.eecs.berkeley.edu/deeprlcourse/) — Berkeley, Sergey Levine
+- [HuggingFace Deep RL](https://huggingface.co/learn/deep-rl-course)
 
----
-
-## References (planned reading)
-
-- Vinyals et al. (2016), *Matching Networks for One Shot Learning*
-- Snell et al. (2017), *Prototypical Networks for Few-Shot Learning*
-- Finn et al. (2017), *Model-Agnostic Meta-Learning*
-- Triantafillou et al. (2020), *Meta-Dataset*
-- (to be extended) tabular FSL: search "few-shot learning tabular data"
+Code references (for comparison):
+- [CleanRL](https://github.com/vwxyzjn/cleanrl) — minimalist implementations
+- [Stable-Baselines3](https://github.com/DLR-RM/stable-baselines3) — production library
 
 ---
 
 ## License
 
-MIT License. See `LICENSE` for details.
+MIT License. See `LICENSE`.
 
 ---
 
 ## Acknowledgments
 
-Built independently during undergraduate studies at Beijing Institute of Technology.
+Built during undergraduate studies at Beijing Institute of Technology.
