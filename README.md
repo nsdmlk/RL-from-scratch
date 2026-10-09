@@ -147,7 +147,7 @@ rl_from_scratch/
 
 ## Roadmap
 
-- [ ] Q-Learning
+- [x] Q-Learning
 - [ ] DQN, Double DQN
 - [ ] REINFORCE, A2C
 - [ ] PPO
