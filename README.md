@@ -17,38 +17,39 @@ Goal: understand RL deeply by building it, not by importing it.
 
 ### Value-based
 
-| Algorithm | Status | Environment | Notes |
-|---|---|---|---|
-| Q-Learning | ✅ | FrozenLake, Taxi | Tabular |
-| DQN | ✅ | CartPole | Replay buffer, target network |
-| Double DQN | ✅ | CartPole | Reduces overestimation |
-| Dueling DQN | 🚧 | CartPole | Value + advantage streams |
-| Rainbow | 📋 | Atari | Planned |
+| Algorithm   | Status | Environment      | Notes                         |
+| ----------- | ------ | ---------------- | ----------------------------- |
+| Q-Learning  | ✅     | FrozenLake, Taxi | Tabular                       |
+| DQN         | ✅     | FrozenLake       | Replay buffer, target network |
+| Double DQN  | 🚧     | CartPole         | Reduces overestimation        |
+| Dueling DQN | 🚧     | CartPole         | Value + advantage streams     |
+| Rainbow     | 📋     | Atari            | Planned                       |
 
 ### Policy-based
 
-| Algorithm | Status | Environment | Notes |
-|---|---|---|---|
-| REINFORCE | ✅ | CartPole | Monte Carlo policy gradient |
-| A2C | ✅ | CartPole, LunarLander | Advantage actor-critic |
-| PPO | ✅ | LunarLander, MuJoCo | Clipped surrogate objective |
-| TRPO | 📋 | MuJoCo | Trust region (planned) |
+| Algorithm | Status | Environment           | Notes                       |
+| --------- | ------ | --------------------- | --------------------------- |
+| REINFORCE | 📋     | CartPole              | Monte Carlo policy gradient |
+| A2C       | 📋     | CartPole, LunarLander | Advantage actor-critic      |
+| PPO       | 📋     | LunarLander, MuJoCo   | Clipped surrogate objective |
+| TRPO      | 📋     | MuJoCo                | Trust region (planned)      |
 
 ### Off-policy actor-critic
 
-| Algorithm | Status | Environment | Notes |
-|---|---|---|---|
-| DDPG | ✅ | Pendulum | Deterministic policy |
-| TD3 | ✅ | MuJoCo | Twin critics, delayed updates |
-| SAC | ✅ | MuJoCo | Maximum entropy RL |
+| Algorithm | Status | Environment | Notes                         |
+| --------- | ------ | ----------- | ----------------------------- |
+| DDPG      | 📋     | Pendulum    | Deterministic policy          |
+| TD3       | 📋     | MuJoCo      | Twin critics, delayed updates |
+| SAC       | 📋     | MuJoCo      | Maximum entropy RL            |
 
 ### Model-based
 
-| Algorithm | Status | Environment | Notes |
-|---|---|---|---|
-| Dreamer V3 | 🚧 | DMControl | Latent dynamics |
-| TD-MPC2 | 📋 | DMControl | Planning + learning |
-| World Models | 📋 | CarRacing | VAE + RNN |
+| Algorithm    | Status | Environment | Notes               |
+| ------------ | ------ | ----------- | ------------------- |
+| Dreamer V3   | 📋     | DMControl   | Latent dynamics     |
+| TD-MPC2      | 📋     | DMControl   | Planning + learning |
+| World Models | 📋     | CarRacing   | VAE + RNN           |
+
 ---
 
 ## Installation
@@ -60,59 +61,6 @@ pip install -e .
 ```
 
 Requires Python 3.10+, PyTorch 2.0+, Gymnasium, MuJoCo.
-
----
-
-## Quick start
-
-```python
-from rl_from_scratch.ppo import PPO
-from rl_from_scratch.envs import make_env
-
-env = make_env("LunarLander-v2")
-agent = PPO(env, lr=3e-4, n_steps=2048, batch_size=64)
-agent.train(total_steps=500_000)
-agent.save("ppo_lunarlander.pt")
-```
-
-Evaluation:
-
-```python
-agent.load("ppo_lunarlander.pt")
-returns = agent.evaluate(n_episodes=100)
-print(f"Mean return: {returns.mean():.1f}")
-```
-
----
-
-## Project structure
-
-```
-rl_from_scratch/
-├── algorithms/
-│   ├── q_learning.py
-│   ├── dqn.py
-│   ├── reinforce.py
-│   ├── a2c.py
-│   ├── ppo.py
-│   ├── ddpg.py
-│   ├── td3.py
-│   ├── sac.py
-│   └── dreamer.py
-├── networks/
-│   ├── mlp.py
-│   ├── cnn.py
-│   └── actor_critic.py
-├── buffers/
-│   ├── replay_buffer.py
-│   └── rollout_buffer.py
-├── envs/
-│   ├── wrappers.py
-│   └── make_env.py
-└── utils/
-    ├── logging.py
-    └── seeding.py
-```
 
 ---
 
@@ -147,8 +95,9 @@ rl_from_scratch/
 
 ## Roadmap
 
-- [x] Q-Learning
-- [ ] DQN, Double DQN
+- [X] Q-Learning
+- [X] DQN
+- [ ] Double DQN
 - [ ] REINFORCE, A2C
 - [ ] PPO
 - [ ] DDPG, TD3, SAC
@@ -164,6 +113,7 @@ rl_from_scratch/
 ## References
 
 Papers:
+
 - [PPO](https://arxiv.org/abs/1707.06347) — Schulman et al., 2017
 - [SAC](https://arxiv.org/abs/1801.01290) — Haarnoja et al., 2018
 - [TD3](https://arxiv.org/abs/1802.09477) — Fujimoto et al., 2018
@@ -171,10 +121,12 @@ Papers:
 - [DQN](https://www.nature.com/articles/nature14236) — Mnih et al., 2015
 
 Courses:
+
 - [CS285](https://rail.eecs.berkeley.edu/deeprlcourse/) — Berkeley, Sergey Levine
 - [HuggingFace Deep RL](https://huggingface.co/learn/deep-rl-course)
 
 Code references (for comparison):
+
 - [CleanRL](https://github.com/vwxyzjn/cleanrl) — minimalist implementations
 - [Stable-Baselines3](https://github.com/DLR-RM/stable-baselines3) — production library
 
