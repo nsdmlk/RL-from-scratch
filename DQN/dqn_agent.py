@@ -12,7 +12,7 @@ class DQNAgent:
         self.target_network = self.q_network.create_target_network()
         for param in self.target_network.parameters(): param.requires_grad_(False)
         self.discount_factor = discount_factor
-        self.optimizer = torch.optim.Adam(self.q_network.parameters(), lr=0.001)
+        self.optimizer = torch.optim.Adam(self.q_network.parameters(), lr=0.001/2)
         self.replay_buffer = ReplayBuffer(capacity=10000)
         
     def sync_target_network(self):
@@ -49,7 +49,7 @@ class DQNAgent:
         return loss
     
     def reset_environment(self):
-        self.env = gym.make('FrozenLake-v1', is_slippery=True)  # Create a new environment instance
+        self.env = gym.make("FrozenLake-v1", is_slippery=True)  # Create a new environment instance
         state, _ = self.env.reset()
         return F.one_hot(torch.tensor(state, dtype=torch.long), num_classes=16).float()  # Add batch dimension
     
