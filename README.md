@@ -17,13 +17,13 @@ Goal: understand RL deeply by building it, not by importing it.
 
 ### Value-based
 
-| Algorithm   | Status | Environment      | Notes                         |
-| ----------- | ------ | ---------------- | ----------------------------- |
-| Q-Learning  | ✅     | FrozenLake, Taxi | Tabular                       |
-| DQN         | ✅     | FrozenLake       | Replay buffer, target network |
-| Double DQN  | 🚧     | CartPole         | Reduces overestimation        |
-| Dueling DQN | 🚧     | CartPole         | Value + advantage streams     |
-| Rainbow     | 📋     | Atari            | Planned                       |
+| Algorithm   | Status | Environment          | Notes                         |
+| ----------- | ------ | -------------------- | ----------------------------- |
+| Q-Learning  | ✅     | FrozenLake, Taxi     | Tabular                       |
+| DQN         | ✅     | FrozenLake, CartPole | Replay buffer, target network |
+| Double DQN  | 🚧     | CartPole             | Reduces overestimation        |
+| Dueling DQN | 🚧     | CartPole             | Value + advantage streams     |
+| Rainbow     | 📋     | Atari                | Planned                       |
 
 ### Policy-based
 
