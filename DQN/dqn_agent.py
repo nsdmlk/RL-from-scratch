@@ -49,13 +49,13 @@ class DQNAgent:
         return loss
     
     def reset_environment(self):
-        self.env = gym.make("FrozenLake-v1", is_slippery=True)  # Create a new environment instance
+        self.env = gym.make("CartPole-v1")
         state, _ = self.env.reset()
-        return F.one_hot(torch.tensor(state, dtype=torch.long), num_classes=16).float()  # Add batch dimension
+        return torch.tensor(state, dtype=torch.float32)
     
     def step_environment(self, action):
         next_state, reward, terminated, truncated, _ = self.env.step(action.item())
-        return F.one_hot(torch.tensor(next_state, dtype=torch.long), num_classes=16).float(), reward, terminated, truncated  # Add batch dimension
+        return torch.tensor(next_state, dtype=torch.float32), reward, terminated, truncated
     
     def train(self, num_episodes, batch_size, epsilon_start=1.0, epsilon_end=0.1, epsilon_decay=0.995):
         epsilon = epsilon_start
@@ -81,7 +81,7 @@ class DQNAgent:
                 self.sync_target_network()
                 
 def evaluation():
-    agent = DQNAgent(input_dim=16, hidden_dim=64, output_dim=4)
+    agent = DQNAgent(input_dim=4, hidden_dim=64, output_dim=2)
     agent.train(num_episodes=1000, batch_size=32, epsilon_start=1.0, epsilon_end=0.1, epsilon_decay=0.995)
     
     # Evaluate the learned policy
@@ -91,7 +91,7 @@ def evaluation():
         state = agent.reset_environment()
         done = False
         while not done:
-            action = agent.select_action(state, epsilon=0.0)  # Set epsilon to 0 for evaluation
+            action = agent.select_action(state, epsilon=0.0)  # No exploration during evaluation
             next_state, reward, terminated, truncated = agent.step_environment(action)
             total_rewards += reward
             state = next_state
