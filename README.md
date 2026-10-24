@@ -22,7 +22,7 @@ Goal: understand RL deeply by building it, not by importing it.
 | Q-Learning  | ✅     | FrozenLake, Taxi     | Tabular                       |
 | DQN         | ✅     | FrozenLake, CartPole | Replay buffer, target network |
 | Double DQN  | ✅     | CartPole             | Reduces overestimation        |
-| Dueling DQN | 🚧     | CartPole             | Value + advantage streams     |
+| Dueling DQN | ✅     | CartPole             | Value + advantage streams     |
 | Rainbow     | 📋     | Atari                | Planned                       |
 
 ### Policy-based
@@ -101,7 +101,7 @@ Requires Python 3.10+, PyTorch 2.0+, Gymnasium, MuJoCo.
 - [ ] REINFORCE, A2C
 - [ ] PPO
 - [ ] DDPG, TD3, SAC
-- [ ] Dueling DQN, Rainbow
+- [X] Dueling DQN
 - [ ] Dreamer V3
 - [ ] TD-MPC2
 - [ ] Vectorized environments
