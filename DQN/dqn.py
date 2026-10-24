@@ -27,26 +27,20 @@ class QNetwork(nn.Module):
             td_target = reward + (1 - done) * discount_factor * max_next_q_value
         return td_target
 
-    def update(self, state, action, reward, next_state, done, discount_factor, optimizer, target_network):
-        # Compute the Q-values for the current state
-        q_values = self.forward(state)
-        
-        # Gather the Q-values corresponding to the taken actions
-        action_q_values = q_values.gather(1, action.unsqueeze(1)).squeeze(1)
-        
-        # Compute the TD target using the target network
-        td_target = self.td_target(reward, next_state, done, discount_factor, target_network)
-        
-        # Huber loss is often used in DQN to reduce the impact of outliers in the TD error.
-        loss = nn.HuberLoss()(action_q_values, td_target)
-        
-        # Perform a gradient descent step
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-        
-        # return the loss for logging purposes
-        return loss.item()
+    def update(self, states, actions, td_target, optimizer):
+            q_values = self.forward(states)
+    
+            action_q_values = q_values.gather(
+                1, actions.unsqueeze(1)
+            ).squeeze(1)
+    
+            loss = nn.HuberLoss()(action_q_values, td_target)
+    
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+    
+            return loss.item()
         
     def td_error(self, state, action, reward, next_state, done, discount_factor, target_network):
         with torch.no_grad():
